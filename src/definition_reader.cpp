@@ -521,10 +521,12 @@ void DefinitionReader::handleDefinition(Group& group, const uint64_t* members,
                                         uint32_t numberOfMembers) {
   size_t group_id;
   size_t current_member;
+
   group.s_name = m_maps.getUnifiedStringID(group.s_name);
 
   for (size_t i{}; i < numberOfMembers; i++) {
-    if (group.s_groupType == OTF2_GROUP_TYPE_COMM_LOCATIONS) {
+    if (group.s_groupType == OTF2_GROUP_TYPE_COMM_LOCATIONS ||
+        group.s_groupType == OTF2_GROUP_TYPE_LOCATIONS) {
       auto member_count(m_traceDefs.getCommGroupMemberCount(group));
       m_maps.mapCommGroupMemberID(group.s_paradigm, member_count);
       current_member = m_maps.getNewLocationID(*(members + i));
@@ -535,7 +537,8 @@ void DefinitionReader::handleDefinition(Group& group, const uint64_t* members,
     group.s_groupMembers.push_back(current_member);
   }
 
-  if (group.s_groupType == OTF2_GROUP_TYPE_COMM_LOCATIONS) {
+  if (group.s_groupType == OTF2_GROUP_TYPE_COMM_LOCATIONS ||
+      group.s_groupType == OTF2_GROUP_TYPE_LOCATIONS) {
     group_id = m_traceDefs.appendGroupLocations(group);
   } else {
     group_id = m_traceDefs.insertDefinition(group);
