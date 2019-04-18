@@ -57,6 +57,8 @@ public:
 
   void handleDefinition(IoPreCreatedHandleState& ioPreCreatedHandle);
 
+  void handleDefinition(string definitionType);
+
   ~DefinitionReader();
 
 private:

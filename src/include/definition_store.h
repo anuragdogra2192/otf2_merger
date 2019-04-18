@@ -301,6 +301,9 @@ public:
              vector<IoPreCreatedHandleState>::iterator>
   getIoPreCreatedHandle();
 
+  void insertWarnings(string definitionType);
+  void messageWarnings();
+
 private:
   vector<ClockProperties>         m_clockProps;
   vector<string>                  m_stringName;
@@ -322,6 +325,7 @@ private:
   vector<IoFileDefinition>        m_ioFileDefinitionDb;
   vector<IoHandle>                m_ioHandleDb;
   vector<IoPreCreatedHandleState> m_ioPreCreatedHandleDb;
+  vector<string>                  m_warningFeatureDb;
 };
 
 #endif

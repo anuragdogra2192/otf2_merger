@@ -347,3 +347,14 @@ DefinitionStore::getIoPreCreatedHandle() {
   auto end_itr = m_ioPreCreatedHandleDb.end();
   return make_tuple(start_itr, end_itr);
 }
+
+void DefinitionStore::insertWarnings(string definitionType) {
+  auto itr = find(m_warningFeatureDb.begin(), m_warningFeatureDb.end(), definitionType);
+  if (itr == m_warningFeatureDb.end()) 
+    m_warningFeatureDb.push_back(definitionType);
+}
+
+void DefinitionStore::messageWarnings() {
+  for (auto i: m_warningFeatureDb)
+    cout << "[OTF2_MERGER] Warning: "<<i<<" based global and event definitions are not supported. \n";
+}

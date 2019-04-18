@@ -29,6 +29,7 @@ void DefinitionWriter::write() {
   writeIoFileDefinition();
   writeIoHandle();
   writeIoPreCreatedHandle();
+  writeWarning();
 }
 
 void DefinitionWriter::writeClockProperties() {
@@ -390,4 +391,8 @@ void DefinitionWriter::writeIoPreCreatedHandle() {
       io_tuple->s_mode,
       io_tuple->s_statusFlags );
   }
+}
+
+void DefinitionWriter::writeWarning() {
+  m_traceDefs.messageWarnings();
 }

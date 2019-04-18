@@ -47,6 +47,8 @@ private:
 
   void writeIoPreCreatedHandle();
 
+  void writeWarning();
+
 private:
   DefinitionStore&      m_traceDefs;
   string                m_archivePath;

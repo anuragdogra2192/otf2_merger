@@ -289,6 +289,74 @@ GlobalDefReaderCallback_IoPreCreatedHandleState(void* userData, OTF2_IoHandleRef
 
   return OTF2_CALLBACK_SUCCESS;
 }
+
+static OTF2_CallbackCode
+
+GlobalDefReaderCallback_MetricMember(
+  void* userData, [[maybe_unused]] OTF2_MetricMemberRef self,
+  [[maybe_unused]] OTF2_StringRef name, [[maybe_unused]] OTF2_StringRef description,
+  [[maybe_unused]] OTF2_MetricType metricType, [[maybe_unused]] OTF2_MetricMode metricMode,
+  [[maybe_unused]] OTF2_Type valueType, [[maybe_unused]] OTF2_Base base,
+  [[maybe_unused]] int64_t exponent, [[maybe_unused]] OTF2_StringRef unit) {
+
+  DefinitionReader* reader = static_cast<DefinitionReader*>(userData);
+  reader->handleDefinition("Metric");
+
+  return OTF2_CALLBACK_SUCCESS;
+}
+
+static OTF2_CallbackCode
+
+GlobalDefReaderCallback_RmaWin(void* userData, [[maybe_unused]] OTF2_RmaWinRef self,
+                               [[maybe_unused]] OTF2_StringRef name,
+                               [[maybe_unused]] OTF2_CommRef   comm) {
+
+  DefinitionReader* reader = static_cast<DefinitionReader*>(userData);
+  reader->handleDefinition("RMA");
+
+  return OTF2_CALLBACK_SUCCESS;
+}
+
+static OTF2_CallbackCode
+
+GlobalDefReaderCallback_CartDimension(void*                                  userData,
+                                      [[maybe_unused]] OTF2_CartDimensionRef self,
+                                      [[maybe_unused]] OTF2_StringRef        name,
+                                      [[maybe_unused]] uint32_t              size,
+                                      [[maybe_unused]] OTF2_CartPeriodicity  cartPeriodicity) {
+
+  DefinitionReader* reader = static_cast<DefinitionReader*>(userData);
+  reader->handleDefinition("CartDimensionAndTopologies");
+
+  return OTF2_CALLBACK_SUCCESS;
+}
+
+static OTF2_CallbackCode
+
+GlobalDefReaderCallback_SourceCodeLocation(void* userData,
+                                           [[maybe_unused]] OTF2_SourceCodeLocationRef self,
+                                           [[maybe_unused]] OTF2_StringRef             file,
+                                           [[maybe_unused]] uint32_t lineNumber) {
+
+  DefinitionReader* reader = static_cast<DefinitionReader*>(userData);
+  reader->handleDefinition("SourceCodeLocation");
+
+  return OTF2_CALLBACK_SUCCESS;
+}
+
+static OTF2_CallbackCode
+
+GlobalDefReaderCallback_CallingContext(
+  void* userData, [[maybe_unused]] OTF2_CallingContextRef self,
+  [[maybe_unused]] OTF2_RegionRef             region,
+  [[maybe_unused]] OTF2_SourceCodeLocationRef sourceCodeLocation,
+  [[maybe_unused]] OTF2_CallingContextRef     parent) {
+
+  DefinitionReader* reader = static_cast<DefinitionReader*>(userData);
+  reader->handleDefinition("CallingContext");
+
+  return OTF2_CALLBACK_SUCCESS;
+}
 }
 
 DefinitionReader::DefinitionReader(DefinitionStore& traceDefs, Maps& maps, OTF2_Reader* reader,
@@ -386,6 +454,21 @@ void DefinitionReader::setup() {
 
   OTF2_GlobalDefReaderCallbacks_SetIoPreCreatedHandleStateCallback(
     global_def_callbacks, &GlobalDefReaderCallback_IoPreCreatedHandleState);
+
+  OTF2_GlobalDefReaderCallbacks_SetMetricMemberCallback(global_def_callbacks,
+                                                        &GlobalDefReaderCallback_MetricMember);
+
+  OTF2_GlobalDefReaderCallbacks_SetRmaWinCallback(global_def_callbacks,
+                                                  &GlobalDefReaderCallback_RmaWin);
+
+  OTF2_GlobalDefReaderCallbacks_SetCartDimensionCallback(
+    global_def_callbacks, &GlobalDefReaderCallback_CartDimension);
+
+  OTF2_GlobalDefReaderCallbacks_SetSourceCodeLocationCallback(
+    global_def_callbacks, &GlobalDefReaderCallback_SourceCodeLocation);
+
+  OTF2_GlobalDefReaderCallbacks_SetCallingContextCallback(
+    global_def_callbacks, &GlobalDefReaderCallback_CallingContext);
 
   OTF2_Reader_RegisterGlobalDefCallbacks(m_otf2Reader, m_otf2DefReader, global_def_callbacks,
                                          this);
@@ -530,7 +613,8 @@ void DefinitionReader::handleDefinition(Group& group, const uint64_t* members,
       auto member_count(m_traceDefs.getCommGroupMemberCount(group));
       m_maps.mapCommGroupMemberID(group.s_paradigm, member_count);
       current_member = m_maps.getNewLocationID(*(members + i));
-    } else {
+    } else if (group.s_groupType == OTF2_GROUP_TYPE_COMM_GROUP ||
+               group.s_groupType == OTF2_GROUP_TYPE_COMM_SELF) {
       auto member_count(m_maps.getCommGroupMemberID(group.s_paradigm));
       current_member = *(members + i) + member_count;
     }
@@ -540,7 +624,8 @@ void DefinitionReader::handleDefinition(Group& group, const uint64_t* members,
   if (group.s_groupType == OTF2_GROUP_TYPE_COMM_LOCATIONS ||
       group.s_groupType == OTF2_GROUP_TYPE_LOCATIONS) {
     group_id = m_traceDefs.appendGroupLocations(group);
-  } else {
+  } else if (group.s_groupType == OTF2_GROUP_TYPE_COMM_GROUP ||
+             group.s_groupType == OTF2_GROUP_TYPE_COMM_SELF) {
     group_id = m_traceDefs.insertDefinition(group);
   }
   m_maps.mapGroup(group_id);
@@ -634,6 +719,10 @@ void DefinitionReader::createSerialComm() {
     auto comm(m_maps.getSerialTraceComm(i));
     handleDefinition(comm);
   }
+}
+
+void DefinitionReader::handleDefinition(string definitionType) {
+  m_traceDefs.insertWarnings(definitionType);
 }
 
 DefinitionReader::~DefinitionReader() {
