@@ -7,7 +7,7 @@
 class DefinitionWriter {
 
 public:
-  DefinitionWriter( OTF2_Archive* archive, DefinitionStore& traceDefs);
+  DefinitionWriter(OTF2_Archive* archive, DefinitionStore& traceDefs);
   void write();
 
 private:

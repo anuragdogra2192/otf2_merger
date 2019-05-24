@@ -16,7 +16,7 @@ private:
 
 public:
   std::vector<std::string> m_trace_files;
-  std::string 			   m_comm_group_pattern;
+  std::string              m_comm_group_pattern;
   std::string              m_archive_path;
   std::string              m_archive_name;
 

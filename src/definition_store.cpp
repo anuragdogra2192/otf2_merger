@@ -136,14 +136,14 @@ bool DefinitionStore::hasAbstractNode() {
   return false;
 }
 
-size_t DefinitionStore::verifyAbstractParent(const size_t sysNodeName) {
+bool DefinitionStore::verifyAbstractParent(const size_t sysNodeName) {
   if (m_sysTreeNodeDb.size() > 1) {
     if (m_sysTreeNodeDb[1].s_name != sysNodeName) {
       m_sysTreeNodeDb[0].s_newRootparent = true;
-      return 0;
+      return true;
     }
   }
-  return -1;
+  return false;
 }
 
 std::tuple<vector<SystemTreeNode>::iterator, vector<SystemTreeNode>::iterator>
@@ -350,11 +350,11 @@ DefinitionStore::getIoPreCreatedHandle() {
 
 void DefinitionStore::insertWarnings(string definitionType) {
   auto itr = find(m_warningFeatureDb.begin(), m_warningFeatureDb.end(), definitionType);
-  if (itr == m_warningFeatureDb.end()) 
-    m_warningFeatureDb.push_back(definitionType);
+  if (itr == m_warningFeatureDb.end()) m_warningFeatureDb.push_back(definitionType);
 }
 
 void DefinitionStore::messageWarnings() {
-  for (auto i: m_warningFeatureDb)
-    cout << "[OTF2_MERGER] Warning: "<<i<<" based global and event definitions are not supported. \n";
+  for (auto i : m_warningFeatureDb)
+    cout << "[OTF2_MERGER] Warning: " << i
+         << " based global and event definitions are not supported. \n";
 }

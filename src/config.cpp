@@ -8,7 +8,8 @@ void Config::help() {
   std::cout
     << "Commands:\n\n"
        "  --traceFile <tfile>: Set trace files with absloute paths. (req.)\n"
-       "  --commGroupPattern <pname>: Provide a pattern name, to be followed by comm and group defintions in the unified trace. (req.)\n"
+       "  --commGroupPattern <pname>: Provide a pattern name, to be followed by comm and "
+       "group defintions in the unified trace. (req.)\n"
        "  --outputPath <path>: Set an output trace path. (req.)\n"
        "  --mergedTraceName <tname>: Set an output trace name, by default \"traces\". \n"
        "  --version: Display otf2 merger version.\n"
